@@ -36,21 +36,23 @@ jobs:
           PICKED_DARK=${dark_themes[$RANDOM % ${#dark_themes[@]}]}
           PICKED_LIGHT=${light_themes[$RANDOM % ${#light_themes[@]}]}
           
-          echo "Picked Dark Theme: $PICKED_DARK"
-          echo "Picked Light Theme: $PICKED_LIGHT"
+          echo "Picked: Dark($PICKED_DARK), Light($PICKED_LIGHT)"
           
-          # Create stable directories
+          # Create and populate stable directories
           mkdir -p profile-summary-card-output/dark-mode
           mkdir -p profile-summary-card-output/light-mode
-          
-          # Copy files from picked themes to stable directories
           cp -r profile-summary-card-output/$PICKED_DARK/* profile-summary-card-output/dark-mode/
           cp -r profile-summary-card-output/$PICKED_LIGHT/* profile-summary-card-output/light-mode/
+          
+          # IMPORTANT: Remove all themed folders EXCEPT dark-mode and light-mode
+          find profile-summary-card-output/ -maxdepth 1 -mindepth 1 -not -name "dark-mode" -not -name "light-mode" -exec rm -rf {} +
 
       - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add profile-summary-card-output/
-          git commit -m "chore: update profile summary cards with random themes" || echo "No changes to commit"
+          git status
+          git commit -m "chore: update profile summary cards with random themes [skip ci]" || echo "No changes to commit"
+          git pull --rebase origin master
           git push origin master
